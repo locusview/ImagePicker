@@ -80,9 +80,16 @@ window.imagePicker.getPictures(
 
 When outputType is FILE_URI the plugin returns images that are stored in a temporary directory.  These images will often not be deleted automatically though.  The files should be moved or deleted after you get their filepaths in javascript. If Base64 Strings are being returned, there is nothing to clean up.
 
-## Android 6 (M) Permissions
-On Android 6 you need to request permission to read external storage at runtime when targeting API level 23+.
-Even if the `uses-permission` tags for the Calendar are present in `AndroidManifest.xml`.
+## Permissions
+
+### Android 6 (API 23 / M)
+
+On Android 6 you need to request permission to read external storage (`READ_EXTERNAL_STORAGE`) at runtime when targeting API level 23+.
+Even if the `uses-permission` tags are present in `AndroidManifest.xml`.
+
+### Android 13 (API 33 / Tiramisu)
+
+From Android 13, the `READ_EXTERNAL_STORAGE` permission was replaced by `READ_MEDIA_IMAGES`.
 
 Note that the `hasReadPermission` function will return true when:
 
