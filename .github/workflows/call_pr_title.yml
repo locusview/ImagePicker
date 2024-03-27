@@ -1,17 +1,85 @@
-# FROM locusview/github-common/common/.github/workflows/call_pr_title.yml
-
+# From: https://github.com/Esri/calcite-components/blob/master/.github/workflows/pr-untruncated.yml
+# Adopted from an action that is no longer maintained
+# https://github.com/deepakputhraya/action-pr-title
 name: PR title check
 
-# Controls when the action will run.
 on:
-
   pull_request:
-    types: [opened, edited, synchronize, reopened]
+    types: [opened, synchronize, edited, reopened]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+  # Allows you to run this workflow externally from other repositories
+  workflow_call:
+
 jobs:
 
-  github-common:
-    uses: locusview/github-common/.github/workflows/pr_title.yml@master
+  pr-title-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            // Title must match this regex
+            const REGEX = new RegExp('(NVIEW|CHIDEV|ES|LV)-[0-9]{1,5}');
+            // Min length of the title
+            const MIN_LENGTH = 10;
+            // Max length of the title (-1 is no max)
+            const MAX_LENGTH = 150;               
+            // Title must start with one of these prefixes
+            const ALLOWED_PREFIXES = ['NVIEW-','CHIDEV-','LV-','ES-','cherry pick','Revert'];
+            // Title cannot start with one of these prefixes
+            const DISALLOWED_PREFIXES = [];
+            // Whether the prefix is case sensitive
+            const PREFIX_CASE_SENSITIVE = true;
+
+            const validateTitlePrefix = (title, prefix) =>
+              PREFIX_CASE_SENSITIVE
+                ? title.startsWith(prefix)
+                : title.toLowerCase().startsWith(prefix.toLowerCase());
+
+            const { title } = context.payload.pull_request;
+            if (!REGEX.test(title)) {
+              core.setFailed(
+                `Pull Request title "${title}" failed to match regex - ${REGEX}`
+              );
+              return;
+            }
+
+            if (title.length < MIN_LENGTH) {
+              core.setFailed(
+                `Pull Request title "${title}" is smaller than the minimum length - ${MIN_LENGTH}`
+              );
+              return;
+            }
+
+            if (MAX_LENGTH > 0 && title.length > MAX_LENGTH) {
+              core.setFailed(
+                `Pull Request title "${title}" is greater than the maximum length - ${MAX_LENGTH}`
+              );
+              return;
+            }
+
+            core.info(`Allowed Prefixes: ${ALLOWED_PREFIXES}`);
+            if (
+              ALLOWED_PREFIXES.length &&
+              !ALLOWED_PREFIXES.some((prefix) => validateTitlePrefix(title, prefix))
+            ) {
+              core.setFailed(
+                `Pull Request title "${title}" did not start with any of the required prefixes - ${ALLOWED_PREFIXES}`
+              );
+              return;
+            }
+
+            core.info(`Disallowed Prefixes: ${DISALLOWED_PREFIXES}`);
+            if (
+              DISALLOWED_PREFIXES.length &&
+              DISALLOWED_PREFIXES.some((prefix) => validateTitlePrefix(title, prefix))
+            ) {
+              core.setFailed(
+                `Pull Request title "${title}" started with one of the disallowed prefixes - ${DISALLOWED_PREFIXES}`
+              );
+              return;
+            }
