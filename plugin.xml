@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android"
   id="cordova-plugin-telerik-imagepicker"
-  version="2.3.5">
+  version="2.4.2">
 
     <name>ImagePicker</name>
 
@@ -38,7 +38,7 @@
 
         <header-file src="src/ios/GMImagePicker/FeHourGlass.h" />
         <source-file src="src/ios/GMImagePicker/FeHourGlass.m" />
-      
+
         <header-file src="src/ios/GMImagePicker/UIImage+fixOrientation.h" />
         <source-file src="src/ios/GMImagePicker/UIImage+fixOrientation.m" />
 
@@ -107,7 +107,9 @@
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
         </config-file>
 
         <preference name="ANDROID_SUPPORT_V7_VERSION" default="27.+"/>
